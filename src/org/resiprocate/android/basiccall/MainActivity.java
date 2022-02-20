@@ -16,6 +16,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import org.resiprocate.android.basicclient.SipService;
+import org.resiprocate.android.basicclient.SipStackRemote;
+
 public class MainActivity extends Activity {
 	
 	Logger logger = Logger.getLogger(MainActivity.class.getCanonicalName());

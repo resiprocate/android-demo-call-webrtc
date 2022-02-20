@@ -18,20 +18,10 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
 
-        externalNativeBuild {
-            cmake {
-                arguments '-DANDROID_STL=c++_shared'
-            }
-        }
-    }
-
-    packagingOptions {
-        doNotStrip '*/*/*.so'
     }
 
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
-    ndkVersion "23.1.7779620"
 
     //lintOptions {
     //    abortOnError false
@@ -42,8 +32,7 @@ android {
     }
 
     dependencies {
-        implementation("com.android.ndk.thirdparty:openssl:1.1.1l-SNAPSHOT")
-        implementation("org.resiprocate:resiprocate:1.13.0-SNAPSHOT")
+        implementation("org.resiprocate.android:android-basic-client:1.0")
     }
 
     signingConfigs {
@@ -58,13 +47,6 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-        }
-    }
-
-    externalNativeBuild {
-        cmake {
-            version '3.18.1'
-            path 'jni/CMakeLists.txt'
         }
     }
 
@@ -85,6 +67,7 @@ android {
 
 allprojects {
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
         maven {

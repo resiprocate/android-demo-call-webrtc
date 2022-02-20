@@ -27,13 +27,6 @@
             android:name="org.resiprocate.android.basiccall.Settings"
             android:label="@string/app_name" >
         </activity>
-        <service
-      		android:name=".SipService"
-      		android:process=":remote">
-      		<intent-filter>
-        		<action	android:name="org.resiprocate.android.basiccall.SipService" />
-      		</intent-filter>
-    	</service>
     </application>
 
 </manifest>
