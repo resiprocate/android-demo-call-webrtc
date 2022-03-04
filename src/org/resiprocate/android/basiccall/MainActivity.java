@@ -18,12 +18,28 @@ import android.widget.EditText;
 
 import org.resiprocate.android.basicclient.SipService;
 import org.resiprocate.android.basicclient.SipStackRemote;
+import org.resiprocate.android.basicclient.SipUserRemote;
 
 public class MainActivity extends Activity {
 	
 	Logger logger = Logger.getLogger(MainActivity.class.getCanonicalName());
 	
 	SipStackRemote mSipStackRemote;
+
+	final String testSdp = "v=0\r\n" +
+		"o=- 0 0 IN IP4 10.1.1.238\r\n" +
+		"s=basicAndroidClientTest\r\n" +
+		"c=IN IP4 10.1.1.238\r\n" +
+		"t=0 0\r\n" +
+		"m=audio 8000 RTP/AVP 9 0 8 18 101\r\n" +
+                "a=rtpmap:9 G722/8000\r\n" +
+                "a=rtpmap:0 PCMU/8000\r\n" +
+                "a=rtpmap:8 PCMA/8000\r\n" +
+		"a=rtpmap:18 G729/8000\r\n" +
+		"a=rtpmap:101 telephone-event/8000\r\n" +
+		"a=fmtp:101 0-16\r\n" +
+                "a=ptime:20" +
+                "a=sendrecv";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +160,11 @@ public class MainActivity extends Activity {
 	        // Following the example above for an AIDL interface,
 	        // this gets an instance of the IRemoteInterface, which we can use to call on the service
 	        mSipStackRemote = SipStackRemote.Stub.asInterface(service);
+		try {
+			mSipStackRemote.registerUser(mSipUser);
+		} catch (RemoteException ex) {
+			logger.throwing("MainActivity", "onServiceConnected", ex);
+		}
 		logger.info("Service is bound");
 	    }
 
@@ -160,4 +181,70 @@ public class MainActivity extends Activity {
 		unbindService(mConnection);
 	}
 
+	private final SipUserRemote.Stub mSipUser = new SipUserRemote.Stub() {
+		@Override
+		public IBinder asBinder() {
+			return this;
+		}
+
+		@Override
+		public void onMessage(String sender, String body) {
+			logger.info("Got a message from " + sender + ": " + body);
+		}
+
+		@Override
+		public void onProgress(int code, String reason) {
+			logger.info("onProgress: " + code + ": " + reason);
+		}
+
+		@Override
+		public void onConnected() {
+			logger.info("onConnected");
+		}
+
+		@Override
+		public void onFailure(int code, String reason) {
+			logger.info("onFailure: " + code + ": " + reason);
+		}
+
+		@Override
+		public void onIncoming(String caller) {
+			logger.info("onIncoming from: " + caller);
+		}
+
+		@Override
+		public void onTerminated(String reason) {
+			logger.info("onTerminated, reason: " + reason);
+		}
+
+		@Override
+		public void onOfferRequired() {
+			logger.info("onOfferRequired");
+			// FIXME - call the WebRTC stack and set up an Observer to call provideOffer
+			try {
+				mSipStackRemote.provideOffer(testSdp);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				logger.throwing("MainActivity", "Stub", e);
+			}
+		}
+
+		@Override
+		public void onAnswerRequired(String offer) {
+			logger.info("onAnswerRequired, offer = " + offer);
+			// FIXME - call the WebRTC stack
+			try {
+				mSipStackRemote.provideAnswer(testSdp);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				logger.throwing("MainActivity", "Stub", e);
+			}
+		}
+
+		@Override
+		public void onAnswer(String answer) {
+			logger.info("onAnswer: " + answer);
+			// FIXME - call the WebRTC stack
+		}
+	};
 }
