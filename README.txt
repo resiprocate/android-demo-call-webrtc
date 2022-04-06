@@ -1,6 +1,6 @@
 
 This is a basic Android app demonstrating how to use reSIProcate on
-Android.  It sends a text message using the SIP MESSAGE method.
+Android.  It uses the WebRTC library to make a call.
 
 You must have the Android SDK, the NDK and a recent version of Gradle.
 
@@ -8,7 +8,8 @@ You must have the Android SDK, the NDK and a recent version of Gradle.
 
       git clone https://github.com/resiprocate/resiprocate.git
       git clone https://github.com/resiprocate/ndkports.git
-      git clone https://github.com/resiprocate/android-demo-message.git
+      git clone https://github.com/resiprocate/android-basic-client.git
+      git clone https://github.com/resiprocate/android-demo-call-webrtc.git
 
 2. Put a reSIProcate tarball into /tmp
 
@@ -20,16 +21,23 @@ You must have the Android SDK, the NDK and a recent version of Gradle.
 
       cd ../ndkports
       git checkout pocock/resiprocate
-      gradle -PndkPath=/home/daniel/Android/Sdk/ndk/23.1.7779620 release -x test
+      export PATH=/opt/gradle-7.3.3/bin/:$PATH
+      gradle -PndkPath=/home/daniel/Android/Sdk/ndk/23.1.7779620 release publishToMavenLocal -x test
 
-4. Build android-demo-message:
+4. Build android-basic-client:
 
-      cd ../android-demo-message
-      gradle assembleDebug
+      cd ../android-basic-client
+      export ANDROID_SDK_ROOT=~/Android/Sdk/
+      gradle -PndkPath=/home/daniel/Android/Sdk/ndk/23.1.7779620 assemble publishToMavenLocal -x test
 
-5. Deploy the APK file to a phone,
+5. Build android-demo-call-webrtc:
 
-   adb install ./build/outputs/apk/debug/android-demo-message-debug.apk
+      cd ../android-demo-call-webrtc
+      gradle -PndkPath=/home/daniel/Android/Sdk/ndk/23.1.7779620 assembleDebug -x test
+
+6. Deploy the APK file to a phone,
+
+   adb install ./build/outputs/apk/debug/android-demo-call-webrtc-debug.apk
 
 Now you have an app that you can run on Android
 
@@ -62,7 +70,7 @@ doesn't appear to be stripping the libraries.
 ndkports/resiprocate/build.gradle.kts includes CXXFLAGS
 for (de-)optimization.
 
-In the android-demo-message build.gradle file, make sure the doNotStrip
+In the android-demo-call-webrtc build.gradle file, make sure the doNotStrip
 option is not commented.
 
 After building the APK, you may want to unpack it with the jar command
@@ -70,7 +78,7 @@ and verify that each shared object is unstripped.  E.g:
 
     mkdir foo
     cd foo
-    jar xf ../build/outputs/apk/debug/android-demo-message-debug.apk
+    jar xf ../build/outputs/apk/debug/android-demo-call-webrtc-debug.apk
     file lib/*/*.so
 
 The correct output looks like this:
@@ -85,13 +93,13 @@ runs a Service in a separate process with a distinct PID.
 
 In this example, the process 12790 is the Service:
 
-134|hlte:/ # ps | grep basicmessage
-u0_a85    12238 376   1023828 52544 sys_epoll_ b5904054 S org.resiprocate.android.basicmessage
-u0_a85    12790 376   989340 45252 sys_epoll_ b5904054 S org.resiprocate.android.basicmessage:remote
+134|hlte:/ # ps | grep basiccall
+u0_a85    12238 376   1023828 52544 sys_epoll_ b5904054 S org.resiprocate.android.basiccall
+u0_a85    12790 376   989340 45252 sys_epoll_ b5904054 S org.resiprocate.android.basiccall:remote
 
 Use a command like this to run gdbserver in the phone:
 
-hlte:/ # gdbserver --attach :5045 `ps | grep basicmessage:remote \
+hlte:/ # gdbserver --attach :5045 `ps | grep basiccall:remote \
               | tr -s ' ' | cut -f2 -d' '`
 
 On the development workstation, set up port 5045:
