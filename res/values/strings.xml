@@ -8,5 +8,6 @@
     <string name="send">Send</string>
     <string name="call">Call</string>
     <string name="msg_text">Message body:</string>
+    <string name="peer_has_left">Peer has left the call.</string>
 
 </resources>

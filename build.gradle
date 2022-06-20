@@ -18,6 +18,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 30
 
+        vectorDrawables.useSupportLibrary = true
     }
 
     compileSdkVersion 30
@@ -33,6 +34,10 @@ android {
 
     dependencies {
         implementation("org.resiprocate.android:android-basic-client:1.0")
+        implementation 'androidx.appcompat:appcompat:1.2.0'
+        implementation 'com.google.android.material:material:1.2.1'
+        implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+        implementation 'org.webrtc:google-webrtc:1.0.26885'
     }
 
     signingConfigs {
@@ -47,6 +52,19 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+            buildConfigField("String", "TURN_SERVER", '"stun:stun1.l.google.com:19302"')
+            // TURN requires trickle ICE signalling support
+            //buildConfigField("String", "TURN_SERVER", '"turn:stun-server.sip5060.net"')
+            buildConfigField("String", "TURN_USER", '"test"')
+            buildConfigField("String", "TURN_CREDENTIAL", '""')
+        }
+        debug {
+            minifyEnabled false
+            buildConfigField("String", "TURN_SERVER", '"stun:stun1.l.google.com:19302"')
+            // TURN requires trickle ICE signalling support
+            //buildConfigField("String", "TURN_SERVER", '"turn:stun-server.sip5060.net"')
+            buildConfigField("String", "TURN_USER", '"test"')
+            buildConfigField("String", "TURN_CREDENTIAL", '""')
         }
     }
 
@@ -69,6 +87,7 @@ allprojects {
     repositories {
         mavenLocal()
         google()
+        jcenter()
         mavenCentral()
         maven {
             url "${rootProject.buildDir}/../../ndkports/build/repository"
